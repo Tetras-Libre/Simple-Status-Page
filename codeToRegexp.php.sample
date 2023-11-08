@@ -1,0 +1,4 @@
+<?php
+$codeToRegexp = [
+	'somecode' => '^someregexonyourlabel.*',
+];

@@ -1,3 +1,22 @@
+<?php
+
+function dieForbiden() {
+     header("HTTP/1.1 403 Forbidden");
+     echo "<h1>Permission denied</h1>";
+     die();
+}
+
+if (!isset($_GET['code'])) {
+	dieForbiden();
+}
+$code = $_GET['code'];
+require_once('codeToRegexp.php');
+if (!$code || !array_key_exists($code, $codeToRegexp)) {
+	dieForbiden();
+}
+$regex = $codeToRegexp[$code];
+
+?>
 <!doctype html>
 <html lang="en" class="h-100">
   <head>
@@ -27,7 +46,9 @@ Welcome to the public status page! Below you can see a list of the currently mon
 </div>
 
 <?php
-require_once('config.php');
+require_once('../config.php');
+require_once('../src/psm/Service/Database.php');
+
 
 $host = constant("PSM_DB_HOST");
 $port = constant("PSM_DB_PORT");
@@ -35,16 +56,13 @@ $db = constant("PSM_DB_NAME");
 $dbuser = constant("PSM_DB_USER");
 $passw = constant("PSM_DB_PASS");
 $dbpf = constant("PSM_DB_PREFIX");
+$port = constant("PSM_DB_PORT");
+
+$db = new psm\Service\Database($host, $dbuser, $passw, $db, $port);
 
 
-$con = mysqli_connect($host, $dbuser, $passw, $db);
-// Check connection
-if (mysqli_connect_errno())
-{
-echo "Failed to connect to the database server: " . mysqli_connect_error();
-}
-
-$result = mysqli_query($con,"SELECT * FROM ". $dbpf ."servers WHERE active='yes';");
+$sql = "SELECT * FROM ". $dbpf ."servers WHERE active='yes' AND label REGEXP '".$regex."';";
+$result = $db->query($sql);
 
 echo "<table class='table table-dark'>
 <tr>
@@ -54,7 +72,7 @@ echo "<table class='table table-dark'>
 <th>Last offline</th>
 </tr>";
 
-while($row = mysqli_fetch_array($result))
+foreach($result as $row)
 {
 if ($row['status'] === "off") {
  $statusx = "Offline";
