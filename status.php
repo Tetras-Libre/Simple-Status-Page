@@ -94,7 +94,7 @@ echo "<tr class='bg-". $statusy ."'>";
 echo "<td>" . $row['label'] . "</td>";
 echo "<td>" . $statusx . "</td>";
 echo "<td>" . $row['last_check'] . "</td>";
-if (strlen($row['last_offline']) < 1 || $row['status'] === "off") {
+if ($row['last_offline'] === null || strlen($row['last_offline']) < 1 || $row['status'] === "off") {
  if ($row['status'] === "off") {
  echo "<td>" . $lonline . "</td>";
  } else {
